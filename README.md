@@ -1,4 +1,4 @@
-# Sella クイックスタート
+# Sella ハンズオン
 
 [Sella](https://github.com/zadorlab/sella) は、原子系の **鞍点最適化 (saddle point optimization)** と
 **局所最小化 (minimization)** を行うための Python ライブラリです。[ASE (Atomic Simulation
@@ -6,8 +6,33 @@ Environment)](https://wiki.fysik.dtu.dk/ase/) と統合されており、NWChem,
 20 種類以上の電子状態計算パッケージから力 (forces) を受け取って、遷移状態 (TS) 探索や IRC 計算を
 実行できます。
 
-このハンズオンでは、EMT (Effective Medium Theory) の安価な力場を使って、Sella の使い方を一通り
-体験します。EMT は ASE に同梱されているため、追加のセットアップなしで動きます。
+このリポジトリは **気相分子** をテーマに、Sella を段階的に学ぶための Jupyter Notebook 集
+(`examples/`) と、クイックリファレンス (この README) からなるハンズオンです。
+
+## ハンズオン (Notebook)
+
+| # | Notebook | 内容 | calculator |
+|---|---|---|---|
+| 1 | [`examples/01_intro_minimization.ipynb`](examples/01_intro_minimization.ipynb) | Sella を ASE Optimizer として使う / Cu4 の最小化 | EMT |
+| 2 | [`examples/02_transition_state_xtb.ipynb`](examples/02_transition_state_xtb.ipynb) | HCN ⇌ HNC の TS を `order=1` で探す + 振動解析で検証 | GFN2-xTB |
+| 3 | [`examples/03_irc.ipynb`](examples/03_irc.ipynb) | TS から IRC を前後に流して反応経路を描く | GFN2-xTB |
+| 4 | [`examples/04_constraints.ipynb`](examples/04_constraints.ipynb) | `Constraints` で緩和スキャン + 拘束付き鞍点探索 | GFN2-xTB |
+| 5 | [`examples/05_ml_potentials.ipynb`](examples/05_ml_potentials.ipynb) | 同じ TS を MACE-MP-0 で解いて xTB と比較 | MACE-MP-0 |
+
+セットアップ:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+jupyter lab examples/
+```
+
+`tblite` (2〜4 章) と `mace-torch` (5 章) はそれぞれ少し重いので、章を進めながら入れても OK です。
+
+---
+
+以下は Sella そのもののクイックリファレンスです。Notebook を進めながら戻ってきて参照してください。
 
 ---
 

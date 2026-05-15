@@ -1,0 +1,17 @@
+# 必須 (全章共通)
+sella>=2.4
+ase>=3.22
+numpy
+scipy
+matplotlib
+jupyterlab
+
+# 構造の可視化に使う (任意)
+nglview>=3.0
+
+# 2〜4 章: xTB calculator
+tblite
+
+# 5 章: MACE-MP-0 (ML ポテンシャル)
+# CPU でも動くが、初回は数百 MB のモデルをダウンロードする
+mace-torch
