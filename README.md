@@ -9,6 +9,29 @@ Environment)](https://wiki.fysik.dtu.dk/ase/) と統合されており、NWChem,
 このリポジトリは **気相分子** をテーマに、Sella を段階的に学ぶための Jupyter Notebook 集
 (`examples/`) と、クイックリファレンス (この README) からなるハンズオンです。
 
+## なぜ Sella を学ぶか
+
+化学反応の **遷移状態 (TS) は 1 次鞍点** です。BFGS や FIRE などの通常の最小化アルゴリズムは
+「全方向で下る」ように設計されているため、鞍点 (1 方向だけ上る必要がある点) には絶対に
+到達できません。Sella は Hessian の部分対角化を使って **「ある方向には登り、他の方向には下る」**
+更新を行うことで、TS を直接最適化できます。
+
+## 学習ロードマップ
+
+```
+1章: 最小化で慣れる (EMT, Cu4)
+  ↓  「最小化と鞍点探索のアルゴリズムの違い」を予告
+2章: TS 探索 + 振動解析検証 (xTB, HCN⇌HNC)
+  ↓  得た TS を引き継ぐ
+3章: IRC で反応経路を辿る (xTB)
+  ↓  反応座標とは何かが具体化
+4章: 拘束付き探索: 緩和スキャン + 拘束付き TS (xTB)
+  ↓  探索戦略の引き出しを増やす
+5章: ML ポテンシャル (MACE-MP-0) で 2 章を解き直し、xTB と比較
+```
+
+各章末に **演習** を 3 問ずつ用意しています。コードを読むだけでは身につかない部分はそこで手を動かしてください。
+
 ## ハンズオン (Notebook)
 
 | # | Notebook | 内容 | calculator |
@@ -19,7 +42,12 @@ Environment)](https://wiki.fysik.dtu.dk/ase/) と統合されており、NWChem,
 | 4 | [`examples/04_constraints.ipynb`](examples/04_constraints.ipynb) | `Constraints` で緩和スキャン + 拘束付き鞍点探索 | GFN2-xTB |
 | 5 | [`examples/05_ml_potentials.ipynb`](examples/05_ml_potentials.ipynb) | 同じ TS を MACE-MP-0 で解いて xTB と比較 | MACE-MP-0 |
 
-セットアップ:
+> **章は順番に実行してください**。2 章の末尾で IPython の `%store` でエネルギー値を保存し、
+> 5 章の冒頭で `%store -r` で読み戻す設計になっています。
+
+## セットアップ
+
+**Python 3.9 以上** を推奨 (`mace-torch` の要件)。
 
 ```bash
 python -m venv .venv
@@ -27,6 +55,19 @@ source .venv/bin/activate
 pip install -r requirements.txt
 jupyter lab examples/
 ```
+
+### 環境依存の注意点
+
+- **`tblite` (2〜4 章)**: Windows / conda 環境では pip インストールに失敗することがあります。
+  その場合は `conda install -c conda-forge tblite-python` を使ってください。
+- **`mace-torch` (5 章)**: 初回 `mace_mp(...)` 呼び出し時に数百 MB のチェックポイントを
+  `~/.cache/mace/` にダウンロードします。プロキシ環境下では `HTTPS_PROXY` を設定してください。
+  事前ダウンロードしたい場合は
+  ```python
+  from mace.calculators import mace_mp
+  _ = mace_mp(model='small', device='cpu')
+  ```
+  を 1 度走らせておくと、後の章でオフラインでも実行できます。
 
 `tblite` (2〜4 章) と `mace-torch` (5 章) はそれぞれ少し重いので、章を進めながら入れても OK です。
 
@@ -36,13 +77,11 @@ jupyter lab examples/
 
 ---
 
-## 1. インストール
+## 1. インストール (Sella 単体)
 
-Python 3.8 以上が必要です。仮想環境を作って `pip` でインストールします。
+Python 3.9 以上を推奨。Sella だけを入れる場合:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
 pip install sella
 ```
 
@@ -53,11 +92,15 @@ pip install sella
 python -c "import sella, ase; print(sella.__version__, ase.__version__)"
 ```
 
+ハンズオン全体 (xTB / MACE 含む) を動かす場合は、上の「セットアップ」セクションを参照してください。
+
 ---
 
 ## 2. はじめての鞍点探索 (Cu(111) 上の Cu 吸着原子)
 
-`examples/01_saddle_point.py` として保存して実行してください。
+以下は **Sella 公式 README に倣った参考スクリプト** です。気相分子ベースの本ハンズオン
+(`examples/01_*.ipynb` 以降) とは別系統のサンプルで、表面拡張のイメージを掴むために掲載しています。
+このまま `cu_saddle.py` として保存して実行できます。
 
 ```python
 #!/usr/bin/env python3

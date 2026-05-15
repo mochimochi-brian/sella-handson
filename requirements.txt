@@ -10,8 +10,10 @@ jupyterlab
 nglview>=3.0
 
 # 2〜4 章: xTB calculator
+# Windows や conda 環境で pip が失敗する場合:
+#   conda install -c conda-forge tblite-python
 tblite
 
-# 5 章: MACE-MP-0 (ML ポテンシャル)
-# CPU でも動くが、初回は数百 MB のモデルをダウンロードする
+# 5 章: MACE-MP-0 (ML ポテンシャル) — Python 3.9 以上が必要
+# CPU でも動くが、初回は数百 MB のモデルを ~/.cache/mace/ にダウンロードする
 mace-torch
